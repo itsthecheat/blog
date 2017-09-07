@@ -48,18 +48,26 @@ class DUP_DB extends wpdb
      */
     public static function getVersion($full = false)
     {
+		global $wpdb;
+
         if ($full) {
             $version = self::getVariable('version');
         } else {
             $version = preg_replace('/[^0-9.].*/', '', self::getVariable('version'));
         }
 
+		//Fall-back for servers that have restricted SQL for SHOW statement
+		if (empty($version)) {
+			$version = $wpdb->db_version();
+		}
+
         return empty($version) ? 0 : $version;
     }
 
 
     /**
-     * Returns the mysqldump path if the server is enabled to execute it
+     * Returns the mysqldump path if the server is enabled to execute it otherwise false
+	 *
      * @return boolean|string
      */
     public static function getMySqlDumpPath()

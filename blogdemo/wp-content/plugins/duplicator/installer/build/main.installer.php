@@ -69,6 +69,9 @@ $GLOBALS['REPLACE_LIST']
 		array_push($GLOBALS['REPLACE_LIST'], array('search' => 'ftps://oldurl/',   'replace' => 'ftps://newurl/'));
   ================================================================================================= */
 
+// Some machines don’t have this set so just do it here.
+date_default_timezone_set('UTC'); 
+
 //COMPARE VALUES
 $GLOBALS['DUPX_DEBUG']		= false;
 $GLOBALS['FW_CREATED']		= '%fwrite_created%';
@@ -80,9 +83,9 @@ $GLOBALS['FW_VERSION_OS']	= '%fwrite_version_os%';
 //GENERAL
 $GLOBALS['FW_TABLEPREFIX']		= '%fwrite_wp_tableprefix%';
 $GLOBALS['FW_URL_OLD']			= '%fwrite_url_old%';
-$GLOBALS['FW_URL_NEW']			= '%fwrite_url_new%';
 $GLOBALS['FW_PACKAGE_NAME']		= '%fwrite_archive_name%';
 $GLOBALS['FW_PACKAGE_NOTES']	= '%fwrite_package_notes%';
+$GLOBALS['FW_PACKAGE_EST_SIZE']	= '%fwrite_package_size%';
 $GLOBALS['FW_SECURE_NAME']		= '%fwrite_secure_name%';
 $GLOBALS['FW_DBHOST']			= '%fwrite_dbhost%';
 $GLOBALS['FW_DBHOST']			= empty($GLOBALS['FW_DBHOST']) ? 'localhost' : $GLOBALS['FW_DBHOST'];
@@ -91,14 +94,12 @@ $GLOBALS['FW_DBPORT']			= empty($GLOBALS['FW_DBPORT']) ? 3306 : $GLOBALS['FW_DBP
 $GLOBALS['FW_DBNAME']			= '%fwrite_dbname%';
 $GLOBALS['FW_DBUSER']			= '%fwrite_dbuser%';
 $GLOBALS['FW_DBPASS']			= '%fwrite_dbpass%';
-$GLOBALS['FW_SSL_ADMIN']		= '%fwrite_ssl_admin%';
-$GLOBALS['FW_SSL_LOGIN']		= '%fwrite_ssl_login%';
-$GLOBALS['FW_CACHE_WP']			= '%fwrite_cache_wp%';
-$GLOBALS['FW_CACHE_PATH']		= '%fwrite_cache_path%';
 $GLOBALS['FW_BLOGNAME']			= '%fwrite_blogname%';
 $GLOBALS['FW_WPROOT']			= '%fwrite_wproot%';
+$GLOBALS['FW_WPLOGIN_URL']		= '%fwrite_wplogin_url%';
 $GLOBALS['FW_OPTS_DELETE']		= json_decode("%fwrite_opts_delete%", true);
 $GLOBALS['FW_DUPLICATOR_VERSION'] = '%fwrite_duplicator_version%';
+$GLOBALS['FW_ARCHIVE_ONLYDB']	= '%fwrite_archive_onlydb%';
 
 //DATABASE SETUP: all time in seconds	
 $GLOBALS['DB_MAX_TIME']		= 5000;
@@ -117,6 +118,7 @@ $GLOBALS['DBCHARSET_DEFAULT'] = 'utf8';
 $GLOBALS['DBCOLLATE_DEFAULT'] = 'utf8_general_ci';
 $GLOBALS['FAQ_URL'] = 'https://snapcreek.com/duplicator/docs/faqs-tech';
 $GLOBALS['NOW_DATE'] = @date("Y-m-d-H:i:s");
+$GLOBALS['DB_RENAME_PREFIX'] = 'x-bak__';
 
 //UPDATE TABLE SETTINGS
 $GLOBALS['REPLACE_LIST'] = array();
@@ -225,10 +227,15 @@ HEADER TEMPLATE: Common header on all steps -->
             version: <?php echo $GLOBALS['FW_DUPLICATOR_VERSION'] ?><br/>
 			&raquo; <a href="javascript:void(0)" onclick="DUPX.showServerInfo()">info</a>
 			&raquo; <a href="?help=1" target="_blank">help</a>
-			
         </td>
     </tr>
-</table>	
+</table>
+
+<?php if ($GLOBALS['FW_ARCHIVE_ONLYDB']) :?>
+	<div style="position: relative">
+		<div class="archive-onlydb">Database Only Mode</div>
+	</div>
+<?php endif; ?>
 
 <!-- =========================================
 FORM DATA: Data Steps -->
@@ -291,15 +298,15 @@ switch ($_POST['action_step']) {
 </div>
 
 <script>
-	/* Server Info Dialog*/
-	DUPX.showServerInfo = function()
-	{
-		modal({
-			type: 'alert',
-			title: 'Server Information',
-			text: $('#dialog-server-info').html()
-		});
-	}
+/* Server Info Dialog*/
+DUPX.showServerInfo = function()
+{
+	modal({
+		type: 'alert',
+		title: 'Server Information',
+		text: $('#dialog-server-info').html()
+	});
+}
 </script>
 
 </body>

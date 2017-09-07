@@ -48,15 +48,6 @@ class DUPX_WPConfig
 			array_push($replace, "'FORCE_SSL_ADMIN', false");
 		}
 
-		if ($_POST['ssl_login']) {
-			if (!strstr($wpconfig, 'FORCE_SSL_LOGIN')) {
-				$wpconfig = $wpconfig.PHP_EOL."define('FORCE_SSL_LOGIN', true);";
-			}
-		} else {
-			array_push($patterns, "/'FORCE_SSL_LOGIN',\s*true/");
-			array_push($replace, "'FORCE_SSL_LOGIN', false");
-		}
-
 		//CACHE CHECKS
 		if ($_POST['cache_wp']) {
 			if (!strstr($wpconfig, 'WP_CACHE')) {
@@ -96,20 +87,129 @@ class DUPX_WPConfig
 			return $config_file;
 		}
 
-		$patterns	 = array("/('|\")WP_HOME.*?\)\s*;/",
-			"/('|\")WP_SITEURL.*?\)\s*;/",
-			"/('|\")DOMAIN_CURRENT_SITE.*?\)\s*;/",
-			"/('|\")PATH_CURRENT_SITE.*?\)\s*;/");
-		$replace	 = array("'WP_HOME', '{$_POST['url_new']}');",
-			"'WP_SITEURL', '{$_POST['url_new']}');",
-			"'DOMAIN_CURRENT_SITE', '{$mu_newDomainHost}');",
-			"'PATH_CURRENT_SITE', '{$mu_newUrlPath}');");
+		$root_path		= DUPX_U::setSafePath($GLOBALS['CURRENT_ROOT_PATH']);
+		$wpconfig_path	= "{$root_path}/wp-config.php";
+		$config_file	= @file_get_contents($wpconfig_path, true);
 
-		$config_file = file_get_contents('wp-config.php', true);
+		$patterns	 = array(
+			"/('|\")WP_HOME.*?\)\s*;/",
+			"/('|\")WP_SITEURL.*?\)\s*;/");
+		$replace	 = array(
+			"'WP_HOME', '{$_POST['url_new']}');",
+			"'WP_SITEURL', '{$_POST['url_new']}');");
+
+		//Not sure how well tokenParser works on all servers so only using for not critical constants at this point.
+		//$count checks for dynamic variable types such as:  define('WP_TEMP_DIR',	'D:/' . $var . 'somepath/');
+		//which should not be updated.
+		$defines = self::tokenParser($wpconfig_path);
+
+		//WP_CONTENT_DIR
+		if (isset($defines['WP_CONTENT_DIR'])) {
+			$val = str_replace($_POST['path_old'], $_POST['path_new'], DUPX_U::setSafePath($defines['WP_CONTENT_DIR']), $count);
+			if ($count > 0) {
+				array_push($patterns, "/('|\")WP_CONTENT_DIR.*?\)\s*;/");
+				array_push($replace, "'WP_CONTENT_DIR', '{$val}');");
+			}
+		}
+
+		//WP_CONTENT_URL
+		if (isset($defines['WP_CONTENT_URL'])) {
+			$val = str_replace($_POST['url_old'] . '/', $_POST['url_new'] . '/', $defines['WP_CONTENT_URL'], $count);
+			if ($count > 0) {
+				array_push($patterns, "/('|\")WP_CONTENT_URL.*?\)\s*;/");
+				array_push($replace, "'WP_CONTENT_URL', '{$val}');");
+			}
+		}
+
+		//WP_TEMP_DIR
+		if (isset($defines['WP_TEMP_DIR'])) {
+			$val = str_replace($_POST['path_old'], $_POST['path_new'], DUPX_U::setSafePath($defines['WP_TEMP_DIR']) , $count);
+			if ($count > 0) {
+				array_push($patterns, "/('|\")WP_TEMP_DIR.*?\)\s*;/");
+				array_push($replace, "'WP_TEMP_DIR', '{$val}');");
+			}
+		}
+		
+		//DOMAIN_CURRENT_SITE
+		if (isset($defines['DOMAIN_CURRENT_SITE'])) {
+			$mu_newDomainHost = parse_url($_POST['url_new'], PHP_URL_HOST);
+			array_push($patterns, "/('|\")DOMAIN_CURRENT_SITE.*?\)\s*;/");
+			array_push($replace, "'DOMAIN_CURRENT_SITE', '{$mu_newDomainHost}');");
+		}
+
+		//PATH_CURRENT_SITE
+		if (isset($defines['PATH_CURRENT_SITE'])) {
+			$mu_newUrlPath = parse_url($_POST['url_new'], PHP_URL_PATH);
+			array_push($patterns, "/('|\")PATH_CURRENT_SITE.*?\)\s*;/");
+			array_push($replace, "'PATH_CURRENT_SITE', '{$mu_newUrlPath}');");
+		}
+		
 		$config_file = preg_replace($patterns, $replace, $config_file);
-		file_put_contents('wp-config.php', $config_file);
+		file_put_contents($wpconfig_path, $config_file);
+		$config_file = file_get_contents($wpconfig_path, true);
 
 		return $config_file;
 	}
+
+
+	public static function tokenParser($wpconfig_path) {
+
+		$defines = array();
+		$wpconfig_file = @file_get_contents($wpconfig_path);
+
+		if (!function_exists('token_get_all')) {
+			DUPX_Log::info("\nNOTICE: PHP function 'token_get_all' does not exist so skipping WP_CONTENT_DIR and WP_CONTENT_URL processing.");
+			return $defines;
+		}
+
+		if ($wpconfig_file === false) {
+			return $defines;
+		}
+
+		$defines = array();
+		$tokens	 = token_get_all($wpconfig_file);
+		$token	 = reset($tokens);
+		while ($token) {
+			if (is_array($token)) {
+				if ($token[0] == T_WHITESPACE || $token[0] == T_COMMENT || $token[0] == T_DOC_COMMENT) {
+					// do nothing
+				} else if ($token[0] == T_STRING && strtolower($token[1]) == 'define') {
+					$state = 1;
+				} else if ($state == 2 && self::isConstant($token[0])) {
+					$key	 = $token[1];
+					$state	 = 3;
+				} else if ($state == 4 && self::isConstant($token[0])) {
+					$value	 = $token[1];
+					$state	 = 5;
+				}
+			} else {
+				$symbol = trim($token);
+				if ($symbol == '(' && $state == 1) {
+					$state = 2;
+				} else if ($symbol == ',' && $state == 3) {
+					$state = 4;
+				} else if ($symbol == ')' && $state == 5) {
+					$defines[self::tokenStrip($key)] = self::tokenStrip($value);
+					$state = 0;
+				}
+			}
+			$token = next($tokens);
+		}
+
+		return $defines;
+
+	}
+
+	private static function tokenStrip($value)
+	{
+		return preg_replace('!^([\'"])(.*)\1$!', '$2', $value);
+	}
+
+	private static function isConstant($token)
+	{
+		return $token == T_CONSTANT_ENCAPSED_STRING || $token == T_STRING || $token == T_LNUMBER || $token == T_DNUMBER;
+	}
+
+
 }
 ?>

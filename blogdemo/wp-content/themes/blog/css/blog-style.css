@@ -1,0 +1,43 @@
+html {
+  height: 100%;
+  background:#fff;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5em;
+}
+#site-header {
+  text-align: center;
+}
+
+#site-header h1 {
+  font-size:32px;
+  color: skyblue;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+.container {
+  margin:0 auto;
+}
+#outer-sidebar {
+  padding-left: 25px;
+}
+#site-sidebar {
+  padding: 22px;
+  background: skyblue;
+}
+#site-content {
+  background: lightgoldenrodyellow;
+  padding: 22px;
+  border-radius:5px;
+}
+#site-footer {
+  margin: 0 5px;
+  padding: 22px;
+  clear:both;
+  color: #444;
+  text-align:center;
+  font-size:12px;
+  text-transform: uppercase;
+}
+li {
+  list-style: none;
+}
