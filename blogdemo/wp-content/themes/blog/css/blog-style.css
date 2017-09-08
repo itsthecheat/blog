@@ -1,16 +1,48 @@
+ul li {
+  list-style: none;
+  display: inline;
+}
+.signature-text {
+  font-size: 12px;
+  font-style: italic;
+}
+.avatar {
+  border-radius: 50%;
+  border: none;
+}
+body .content-single {
+  text-align: justify;
+}
 html {
   height: 100%;
-  background:#fff;
   font-family: "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5em;
 }
+svg {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+body {
+  background-color: rgb(54, 178, 255);
+  font-size: 14px;
+}
+input {
+  border: none;
+}
+i {
+  color: white;
+  padding: 5px;
+}
 #site-header {
+  background: transparent;
   text-align: center;
 }
 
 #site-header h1 {
+  padding: 20px;
   font-size:32px;
-  color: skyblue;
+  color: #fff;
   font-weight: 300;
   letter-spacing: 1px;
 }
@@ -22,12 +54,11 @@ html {
 }
 #site-sidebar {
   padding: 22px;
-  background: skyblue;
+  background: #fff;
 }
 #site-content {
-  background: lightgoldenrodyellow;
+  background: #fff;
   padding: 22px;
-  border-radius:5px;
 }
 #site-footer {
   margin: 0 5px;
@@ -40,4 +71,10 @@ html {
 }
 li {
   list-style: none;
+}
+a {
+  color: black;
+}
+.footer {
+  position: relative;
 }

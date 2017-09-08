@@ -8,11 +8,11 @@
           <a href='<?php the_permalink() ?>'><?php the_title() ?></a>
         </h3>
 
-        <p><?php the_content(__('(more...)')) ?></p>
+        <p><?php get_template_part('template-parts/content', ''); ?></p>
 
   <?php endwhile; else : ?>
-          <p><?php _e( 'Sorry, no posts matched your criteria.' ); ?></p>
 
+            <?php get_template_part( 'template-parts/content', 'none' ); ?>
   <?php endif; ?>
 
 

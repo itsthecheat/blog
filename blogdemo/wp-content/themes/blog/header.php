@@ -9,7 +9,12 @@
 </head>
 
 <body <?php body_class(); ?> >
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <polygon fill="grey" points="0,100 100,0 100,100"/>
+  </svg>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="#">YDKL</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -29,14 +34,14 @@
       );
       ?>
 
+    <span><?php get_search_form(); ?></span>
   </nav>
 
   <div id="site-header">
     <h1><?php bloginfo('title') ?></h1>
   </div>
-
-  <div class="container">
-  <div class="row justify-content-between">
-    <div class="col-lg-8 col-sm-8"  id="site-content">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-sm-8"  id="site-content">
 
 
