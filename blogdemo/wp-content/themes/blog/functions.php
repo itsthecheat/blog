@@ -5,7 +5,6 @@ require_once('class-wp-bootstrap-navwalker.php');
 
 //Add menu items for navbar
 add_theme_support('menus');
-add_filter('widget_text', 'do_shortcode');
 
 function register_theme_menus() {
     register_nav_menus(
@@ -50,4 +49,13 @@ function blog_theme_js() {
     wp_enqueue_script('bootstrap_js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), '', true);
 }
 add_action( 'wp_enqueue_scripts', 'blog_theme_js');
+
+function wpb_move_comment_field_to_bottom( $fields ) {
+$comment_field = $fields['comment'];
+unset( $fields['comment'] );
+$fields['comment'] = $comment_field;
+return $fields;
+}
+
+add_filter( 'comment_form_fields', 'wpb_move_comment_field_to_bottom' );
 ?>

@@ -51,6 +51,35 @@ class DUP_Util
 		self::$PHP7_plus = version_compare(PHP_VERSION, '7.0.0', '>=');
     }
 
+
+    public static function getWPCoreDirs()
+    {
+        $wp_core_dirs = array(get_home_path().'wp-admin',get_home_path().'wp-includes');
+
+        //if wp_content is overrided
+        $wp_path = get_home_path()."wp-content";
+        if(get_home_path().'wp-content' != WP_CONTENT_DIR){
+            $wp_path = WP_CONTENT_DIR;
+        }
+        $wp_path = str_replace("\\", "/", $wp_path);
+
+        $wp_core_dirs[] = $wp_path;
+        $wp_core_dirs[] = $wp_path.'/plugins';
+        $wp_core_dirs[] = $wp_path.'/themes';
+
+
+        return $wp_core_dirs;
+    }
+    /**
+     * return absolute path for the files that are core directories
+     * @return string array
+     */
+    public static function getWPCoreFiles()
+    {
+        $wp_cored_dirs = array(get_home_path().'wp-config.php');
+        return $wp_cored_dirs;
+    }
+
 	/**
 	 * Groups an array into arrays by a given key, or set of keys, shared between all array members.
 	 *
@@ -628,6 +657,33 @@ class DUP_Util
 			"{$wpdb->prefix}usermeta",
 			"{$wpdb->prefix}users");
     }
+	
+	/**
+     * Runs esc_html and sanitize_textarea_field on a string
+	 *
+	 * @param string   The string to process
+     *
+     * @return string  Returns and escaped and sanitized string
+     */
+    public static function escSanitizeTextAreaField($string)
+    {
+		if (!function_exists('sanitize_textarea_field')) {
+			return esc_html(sanitize_text_field($string));
+		} else {
+			return esc_html(sanitize_textarea_field($string));
+		}	
+    }
+
+	/**
+     * Runs esc_html and sanitize_text_field on a string
+	 *
+	 * @param string   The string to process
+     *
+     * @return string  Returns and escaped and sanitized string
+     */
+    public static function escSanitizeTextField($string)
+    {
+		return esc_html(sanitize_text_field($string));
+    }
 }
 DUP_Util::init();
-?>

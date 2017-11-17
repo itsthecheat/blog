@@ -122,6 +122,8 @@ class DUP_Package
         //$report['ARC']['Status']['Big']   = count($this->Archive->FilterInfo->Files->Size) ? 'Warn' : 'Good';
         $report['ARC']['Dirs']  = $this->Archive->Dirs;
         $report['ARC']['Files'] = $this->Archive->Files;
+		$report['ARC']['Status']['AddonSites'] = count($this->Archive->FilterInfo->Dirs->AddonSites) ? 'Warn' : 'Good';
+            
 
 
         //DATABASE
@@ -183,7 +185,7 @@ class DUP_Package
         $php_max_memory = ($php_max_memory === false) ? "Unabled to set php memory_limit" : DUPLICATOR_PHP_MAX_MEMORY." ({$php_max_memory} default)";
 
         $info = "********************************************************************************\n";
-        $info .= "DUPLICATOR-LITE PACKAGE-LOG: ".@date("Y-m-d H:i:s")."\n";
+        $info .= "DUPLICATOR-LITE PACKAGE-LOG: ".@date(get_option('date_format')." ".get_option('time_format'))."\n";
         $info .= "NOTICE: Do NOT post to public sites or forums \n";
         $info .= "********************************************************************************\n";
         $info .= "VERSION:\t".DUPLICATOR_VERSION."\n";
@@ -268,7 +270,7 @@ class DUP_Package
         $info .= "RECORD ID:[{$this->ID}]\n";
         $info .= "TOTAL PROCESS RUNTIME: {$timerSum}\n";
         $info .= "PEAK PHP MEMORY USED: ".DUP_Server::getPHPMemory(true)."\n";
-        $info .= "DONE PROCESSING => {$this->Name} ".@date("Y-m-d H:i:s")."\n";
+        $info .= "DONE PROCESSING => {$this->Name} ".@date(get_option('date_format')." ".get_option('time_format'))."\n";
 
         DUP_Log::Info($info);
         DUP_Log::Close();
@@ -319,20 +321,20 @@ class DUP_Package
             $this->Hash       = $this->makeHash();
             $this->NameHash   = "{$this->Name}_{$this->Hash}";
 
-            $this->Notes                    = esc_html(sanitize_textarea_field($post['package-notes']));
+            $this->Notes                    = DUP_Util::escSanitizeTextAreaField($post['package-notes']);
             //ARCHIVE
             $this->Archive->PackDir         = rtrim(DUPLICATOR_WPROOTPATH, '/');
             $this->Archive->Format          = 'ZIP';
             $this->Archive->FilterOn        = isset($post['filter-on']) ? 1 : 0;
 			$this->Archive->ExportOnlyDB    = isset($post['export-onlydb']) ? 1 : 0;
-            $this->Archive->FilterDirs      = esc_html(sanitize_textarea_field($filter_dirs));
-			 $this->Archive->FilterFiles    = esc_html(sanitize_textarea_field($filter_files));
-            $this->Archive->FilterExts      = str_replace(array('.', ' '), '', esc_html(sanitize_textarea_field($filter_exts)));
+            $this->Archive->FilterDirs      = DUP_Util::escSanitizeTextAreaField($filter_dirs);
+			 $this->Archive->FilterFiles    = DUP_Util::escSanitizeTextAreaField($filter_files);
+            $this->Archive->FilterExts      = str_replace(array('.', ' '), '', DUP_Util::escSanitizeTextAreaField($filter_exts));
             //INSTALLER
-            $this->Installer->OptsDBHost    = esc_html(sanitize_text_field($post['dbhost']));
-            $this->Installer->OptsDBPort    = esc_html(sanitize_text_field($post['dbport']));
-            $this->Installer->OptsDBName    = esc_html(sanitize_text_field($post['dbname']));
-            $this->Installer->OptsDBUser    = esc_html(sanitize_text_field($post['dbuser']));
+            $this->Installer->OptsDBHost    = DUP_Util::escSanitizeTextField($post['dbhost']);
+            $this->Installer->OptsDBPort    = DUP_Util::escSanitizeTextField($post['dbport']);
+            $this->Installer->OptsDBName    = DUP_Util::escSanitizeTextField($post['dbname']);
+            $this->Installer->OptsDBUser    = DUP_Util::escSanitizeTextField($post['dbuser']);
             //DATABASE
             $this->Database->FilterOn       = isset($post['dbfilter-on']) ? 1 : 0;
             $this->Database->FilterTables   = esc_html($tablelist);

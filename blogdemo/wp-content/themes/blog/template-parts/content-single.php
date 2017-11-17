@@ -17,6 +17,7 @@
     </li>
   </ul>
 
-  <?php the_content(); ?></div>
+  <?php the_content(); ?>
+</div>
 
 

@@ -11,5 +11,8 @@
     get_template_part( 'template-parts/content', 'none' );
   }
 ?>
+<div class="comments">
+  <?php comments_template(); ?>
+</div>
 
 <?php get_footer() ?>

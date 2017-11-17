@@ -31,12 +31,17 @@ aside.widget {
   margin-bottom: 2em;
   background: rgb(198,226,218);
 }
-ul.cnss-social-icon, li.cn-fa-icon a{
-  padding: 5px;
+.widget li {
+  display: block;
+  text-transform: uppercase;
+  font-size: 13px;
 }
-/* ul.cnss-social-icon li a {
-  border: 1.5px solid black !important;
-} */
+p.widget-title {
+  font-size: 20px;
+  font-family: 'Abril Fatface', cursive;
+  letter-spacing: 1.5px;
+  text-transform: none;
+}
 #outer-content {
   padding-bottom: 10px;
 }
